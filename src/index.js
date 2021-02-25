@@ -2,7 +2,7 @@
 const { registerCommands, registerEvents } = require('./utils/registry');
 const config = require('../slappey.json');
 const {Client} = require('discord.js')
-
+require('dotenv').config()
 const client = new Client
 ;(async () => {
   client.commands = new Map();
@@ -10,5 +10,5 @@ const client = new Client
   client.prefix = config.prefix;
   await registerCommands(client, '../commands');
   await registerEvents(client, '../events');
-  await client.login(config.token);
+  await client.login(process.env.TOKEN);
 })();
