@@ -1,38 +1,14 @@
-const {Client, Intents, Collection} = require('discord.js')
-const {promisify} = require('util')
-const glob = require('glob')
-const cf = require('../config.json')
 
-const globPromise = promisify(glob)
-const client = new Client({
-ws: {
-    intents: Intents.all
-}
+const { registerCommands, registerEvents } = require('./utils/registry');
+const config = require('../slappey.json');
+const {Client} = require('discord.js')
 
-});
-
-client.commands = new Collection()
-client.events = new Collection()
-client.cooldowns = new Collection()
-client.aliases = new Collection()
-
-;(async() => {
-const Efiles = await globPromise(`${__dirname}/events/**/*.js`)
-const Cfiles = await globPromise(`${__dirname}/commands/**/*.js`)
-
-Efiles.map((value) => {
-const f = require(value)
-client.events.set(f.name, f)
-client.on(f.name, f.run.bind(null, client))
-})
-
-Cfiles.map((value) => {
-    const f = require(value)
-    client.commands.set(f.name, f)
-    if(f.aliases) {
-        f.aliases.map((value) => client.aliases.set(value, f.name))
-    }
-    })
+const client = new Client
+;(async () => {
+  client.commands = new Map();
+  client.events = new Map();
+  client.prefix = config.prefix;
+  await registerCommands(client, '../commands');
+  await registerEvents(client, '../events');
+  await client.login(config.token);
 })();
-
-client.login(cf.token)
